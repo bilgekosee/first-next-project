@@ -1,23 +1,24 @@
 import { notFound } from "next/navigation";
-import { getArticle, articles } from "@/lib/articles";
+import { getPostById, getAllPosts } from "@/lib/api";
 
 export async function generateStaticParams() {
-  return Object.keys(articles).map((slug) => ({ slug }));
+  const posts = await getAllPosts();
+  return posts.map((post: any) => ({ slug: post.id.toString() }));
 }
+
 export default async function BlogPost({
   params,
 }: {
   params: { slug: string };
 }) {
-  await new Promise((res) => setTimeout(res, 1000)); // 1 saniye bekle
-  const content = getArticle(params.slug);
+  const post = await getPostById(params.slug);
 
-  if (!content) notFound();
+  if (!post) notFound();
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>{params.slug.replaceAll("-", " ").toUpperCase()}</h1>
-      <p>{content}</p>
+      <h1>{post.title}</h1>
+      <p>{post.body}</p>
     </div>
   );
 }
